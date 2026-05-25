@@ -1,0 +1,116 @@
+general:
+  source: "//192.168.10.200/FA_Vision/2.SEI_AI_Camera/2.CutVideos/20240821/F1-COP1-05_20240821141558_cut14.mp4"
+  autoRestart: true
+  autoRestartAPI: true
+  ThreadCap: False
+  MaxRetry: 10
+  MaxRetryAPI: 10
+  output: "output/result"
+  device: 0
+  save: False
+  show: true
+  max_retries: 5
+  retry_delay: 5
+
+model_All:
+  weights: SSGLogic/ModelAll/All_V8_20250424_best.pt
+  weights_Keo: SSGLogic/ModelKeo/All_v8_2608205_best.pt
+  imgsz: 640
+  conf: 0.5
+  iou: 0.5
+  colors:
+    NG: (0, 0, 255)
+    OK: (0, 255, 0)
+    
+    OBJECT: (255, 0, 0)
+    CABIN: (0, 255, 255)
+    PANEL: (0, 255, 0)
+    LIGHTRED: (0, 0, 255)
+    LIGHTYELLOW: (0, 255, 255)
+    LIGHTGREEN: (0, 255, 0)
+    LIGHTALL: (255, 255, 255)
+    FLOOR: (42, 42, 128)
+    SCISSORCHECK: (255, 0, 255)
+    GATHER: (255, 255, 255)
+
+# accept_roll: # cuon dong
+#   Count : 6
+#   point1: (1189, 546)
+#   point2: (943, 1033)
+#   point3: (611, 910)
+#   point4: (845, 565)
+#   point5: (1047, 613)
+#   point6: (1095, 524)
+
+accept_roll: # cuon dong
+  Count : 13
+  point1: (644, 900)
+  point2: (796, 950)
+  point3: (1163, 243)
+  point4: (945, 216)
+  point5: (758, 381)
+  point6: (760, 455)
+  point7: (986, 492)
+  point8: (946, 580)
+  point9: (660, 525)
+  point10: (614, 610)
+  point11: (786, 662)
+  point12: (750, 770)
+  point13: (584, 734)
+
+Scissor_warning:
+  Count: 7
+  point1: (640, 893)
+  point2: (793, 941)
+  point3: (1155, 249)
+  point4: (948, 211)
+  point5: (755, 385)
+  point6: (692, 374)
+  point7: (580, 745)
+  
+lightBox:
+  thresh : 30
+  RectRed: (505,190,510,195)
+  RectYellow: (510,215,515,220)
+  RectGreen: (515,240,520,245)
+  RectAll: (501,176,550,274)
+
+cabin:
+  Count: 7
+  point1: (640, 893)
+  point2: (793, 941)
+  point3: (1155, 249)
+  point4: (948, 211)
+  point5: (755, 385)
+  point6: (692, 374)
+  point7: (580, 745)
+
+panel:
+  Count: 4
+  point1: (554, 411)
+  point2: (603, 374)
+  point3: (616, 434)
+  point4: (571, 471)
+
+gather_warning:
+  Count: 7
+  point1: (464, 347)
+  point2: (758, 385)
+  point3: (942, 217)
+  point4: (1385, 256)
+  point5: (1073, 1079)
+  point6: (979, 1079)
+  point7: (645, 908)
+
+scissorBox:
+  left: 520
+  top: 224
+  right: 1140
+  bottom: 868
+
+api:
+  API: http://10.212.10.234:81/api/
+  CAMERA_SETTING: GetCamSetting?
+  ABNORMAL: SaveAbnormalLog
+  MEDIA: SaveImage
+  POST: True
