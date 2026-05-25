@@ -1,5 +1,5 @@
 general:
-  source: //192.168.96.66/1.Saomai/2024/7.CCTV-AI/01-DataCam23/2.CutVideos/CAM2-F1-COP1-2/20240822/20240822_20240822163613_20240822163931_163628_0.mp4
+  source: ''
   autoRestart: True
   autoRestartAPI: true
   ThreadCap: False
@@ -13,7 +13,7 @@ general:
   retry_delay: 5
 
 model_All:
-  weights: CBInside/ModelAll/Cam2_09072025_v10_best.pt
+  weights: ''
   imgsz: 640
   conf: 0.5
   iou: 0.5
@@ -82,7 +82,7 @@ accept_roll:
   point4: (0, 0)  
   point5: (0, 0)
 api:
-  API: http://10.212.10.234:81/api/
+  API: ''
   CAMERA_SETTING: GetCamSetting?
   ABNORMAL: SaveAbnormalLog
   MEDIA: SaveImage
