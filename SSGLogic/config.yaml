@@ -1,5 +1,5 @@
 general:
-  source: "//192.168.10.200/FA_Vision/2.SEI_AI_Camera/2.CutVideos/20240821/F1-COP1-05_20240821141558_cut14.mp4"
+  source: ''
   autoRestart: true
   autoRestartAPI: true
   ThreadCap: False
@@ -13,8 +13,8 @@ general:
   retry_delay: 5
 
 model_All:
-  weights: SSGLogic/ModelAll/All_V8_20250424_best.pt
-  weights_Keo: SSGLogic/ModelKeo/All_v8_2608205_best.pt
+  weights: ''
+  weights_Keo: ''
   imgsz: 640
   conf: 0.5
   iou: 0.5
@@ -109,7 +109,7 @@ scissorBox:
   bottom: 868
 
 api:
-  API: http://10.212.10.234:81/api/
+  API: ''
   CAMERA_SETTING: GetCamSetting?
   ABNORMAL: SaveAbnormalLog
   MEDIA: SaveImage
