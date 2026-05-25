@@ -1,5 +1,5 @@
 general:
-  source: //192.168.96.66/1.Saomai/2024/7.CCTV-AI/01-DataCam23/1.CCTVVideos/CAM3/F1-COPPER 1_F1-COP1-04_20240719151400_20240719153230.mp4
+  source: ''
   autoRestart: True
   autoRestartAPI: true
   output: "output/result"
@@ -13,7 +13,7 @@ general:
   retry_delay: 5
 
 model_All:
-  weights: CBOutside/ModelAll/CAM3-Outside_V010-20241112.pt
+  weights: ''
   imgsz: 640
   conf: 0.5
   iou: 0.5
@@ -55,7 +55,7 @@ gather_warning:
   point4: (423, 492)
   
 api:
-  API: http://10.212.10.234:81/api/
+  API: ''
   CAMERA_SETTING: GetCamSetting?
   ABNORMAL: SaveAbnormalLog
   MEDIA: SaveImage
