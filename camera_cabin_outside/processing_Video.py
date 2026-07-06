@@ -48,7 +48,7 @@ class SSGVision:
             config = yaml.load(f, Loader=yaml.FullLoader)
         self.CAM3_general_config = config["general"]
         self.CAM3_UseThreadCap = self.CAM3_general_config["ThreadCap"]
-        self.CAM3_model_all_config = config["model_All"]
+        self.CAM3_model_main_config = config["model_main"]
         self.CAM3_roll_warning = config["accept_roll"]
         self.CAM3_gather_warning = config['gather_warning']
         self.CAM3_api = config["api"]
@@ -58,7 +58,7 @@ class SSGVision:
         self.CAM3_auto_restart = self.CAM3_general_config['autoRestart']
         self.CAM3_output_path = self.CAM3_general_config['output']
         self.CAM3_device_setting = self.CAM3_general_config['device']
-        self.CAM3_imgsz = self.CAM3_model_all_config['imgsz']
+        self.CAM3_imgsz = self.CAM3_model_main_config['imgsz']
         self.CAM3_apicamsetting = self.CAM3_api["API"] + self.CAM3_api["CAMERA_SETTING"]
         self.CAM3_apiabnormal = self.CAM3_api["API"] + self.CAM3_api["ABNORMAL"]
         self.CAM3_apimedia = self.CAM3_api["API"] + self.CAM3_api["MEDIA"]
@@ -73,11 +73,11 @@ class SSGVision:
         self.CAM3_duration = 0
         # Set Color
         self.CAM3_colors = {
-            "NG": eval(self.CAM3_model_all_config['colors']['NG']),
-            "OK": eval(self.CAM3_model_all_config['colors']['OK']),
-            "OBJECT": eval(self.CAM3_model_all_config["colors"]["OBJECT"]),
-            "FLOOR": eval(self.CAM3_model_all_config['colors']['FLOOR']),
-            "GATHER": eval(self.CAM3_model_all_config['colors']['GATHER'])
+            "NG": eval(self.CAM3_model_main_config['colors']['NG']),
+            "OK": eval(self.CAM3_model_main_config['colors']['OK']),
+            "OBJECT": eval(self.CAM3_model_main_config["colors"]["OBJECT"]),
+            "FLOOR": eval(self.CAM3_model_main_config['colors']['FLOOR']),
+            "GATHER": eval(self.CAM3_model_main_config['colors']['GATHER'])
         }
         # Initialize required parameter for check (no use glove, roll on the floor and hand touch Panel)
         self.CAM3_check_roll = 0

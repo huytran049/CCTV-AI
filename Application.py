@@ -91,7 +91,7 @@ class CameraWorker(QObject):
             with open(self.CAM1_config_path, "r", encoding="utf8") as f:
                 config = yaml.load(f, Loader=yaml.FullLoader)
             self.CAM1_general_config = config["general"]
-            self.CAM1_model_all_config = config["model_All"]
+            self.CAM1_model_main_config = config["model_main"]
             self.CAM1_api = config["api"]
             self.CAM1_apicamsetting = self.CAM1_api["API"] + self.CAM1_api["CAMERA_SETTING"] + camip
             self.CAM1_post = self.CAM1_api["POST"]
@@ -103,22 +103,22 @@ class CameraWorker(QObject):
             # Set up Box of Cabin, Panel, Floor and Light indicator position
             line_safety_monitor.set_coordinates()
             # Load model detect
-            self.CAM1_model_All = line_safety_monitor.load_modelv8(self.CAM1_model_all_config["weights"])
-            self.CAM1_model_keo = line_safety_monitor.load_modelv8(self.CAM1_model_all_config["weights_Keo"])
+            self.CAM1_model_main = line_safety_monitor.load_modelv8(self.CAM1_model_main_config["weights"])
+            self.CAM1_model_keo = line_safety_monitor.load_modelv8(self.CAM1_model_main_config["weights_Keo"])
             # Set Color
             self.CAM1_colors = {
-                "NG": eval(self.CAM1_model_all_config['colors']['NG']),
-                "OK": eval(self.CAM1_model_all_config['colors']['OK']),
-                "OBJECT": eval(self.CAM1_model_all_config["colors"]["OBJECT"]),
-                "CABIN": eval(self.CAM1_model_all_config['colors']['CABIN']),
-                "PANEL": eval(self.CAM1_model_all_config['colors']['PANEL']),
-                "LIGHTRED": eval(self.CAM1_model_all_config['colors']['LIGHTRED']),
-                "LIGHTYELLOW": eval(self.CAM1_model_all_config['colors']['LIGHTYELLOW']),
-                "LIGHTGREEN": eval(self.CAM1_model_all_config['colors']['LIGHTGREEN']),
-                "LIGHTALL": eval(self.CAM1_model_all_config['colors']['LIGHTALL']),
-                "FLOOR": eval(self.CAM1_model_all_config['colors']['FLOOR']),
-                "SCISSORCHECK": eval(self.CAM1_model_all_config['colors']['SCISSORCHECK']),
-                "GATHER": eval(self.CAM1_model_all_config['colors']['GATHER']),
+                "NG": eval(self.CAM1_model_main_config['colors']['NG']),
+                "OK": eval(self.CAM1_model_main_config['colors']['OK']),
+                "OBJECT": eval(self.CAM1_model_main_config["colors"]["OBJECT"]),
+                "CABIN": eval(self.CAM1_model_main_config['colors']['CABIN']),
+                "PANEL": eval(self.CAM1_model_main_config['colors']['PANEL']),
+                "LIGHTRED": eval(self.CAM1_model_main_config['colors']['LIGHTRED']),
+                "LIGHTYELLOW": eval(self.CAM1_model_main_config['colors']['LIGHTYELLOW']),
+                "LIGHTGREEN": eval(self.CAM1_model_main_config['colors']['LIGHTGREEN']),
+                "LIGHTALL": eval(self.CAM1_model_main_config['colors']['LIGHTALL']),
+                "FLOOR": eval(self.CAM1_model_main_config['colors']['FLOOR']),
+                "SCISSORCHECK": eval(self.CAM1_model_main_config['colors']['SCISSORCHECK']),
+                "GATHER": eval(self.CAM1_model_main_config['colors']['GATHER']),
             }
             # line_safety_monitor.CheckDeleteLog(self.CAM1_baseDir)
 
@@ -134,7 +134,7 @@ class CameraWorker(QObject):
             with open(config_path, "r", encoding="utf8") as f:
                 config = yaml.load(f, Loader=yaml.FullLoader)
             self.CAM2_general_config = config["general"]
-            self.CAM2_model_all_config = config["model_All"]
+            self.CAM2_model_main_config = config["model_main"]
             self.CAM2_api = config["api"]
             self.CAM2_apicamsetting = self.CAM2_api["API"] + self.CAM2_api["CAMERA_SETTING"] + camip
             self.CAM2_post = self.CAM2_api["POST"]
@@ -145,20 +145,20 @@ class CameraWorker(QObject):
             # Set up Box of Panel position
             cabin_inside_monitor.set_coordinates()
             # Load model detect
-            self.CAM2_model_All = cabin_inside_monitor.load_model(self.CAM2_model_all_config["weights"])
+            self.CAM2_model_main = cabin_inside_monitor.load_model(self.CAM2_model_main_config["weights"])
             # Set Color
             self.CAM2_colors = {
-                "NG": eval(self.CAM2_model_all_config['colors']['NG']),
-                "OK": eval(self.CAM2_model_all_config['colors']['OK']),
-                "OBJECT": eval(self.CAM2_model_all_config["colors"]["OBJECT"]),
-                "PANEL": eval(self.CAM2_model_all_config['colors']['PANEL']),
-                "FLOOR": eval(self.CAM2_model_all_config['colors']['FLOOR']),
-                "GLOVECHECK": eval(self.CAM2_model_all_config['colors']['GLOVECHECK']),
-                "SCISSORCHECK": eval(self.CAM2_model_all_config['colors']['SCISSORCHECK']),
-                "LIGHTRED": eval(self.CAM2_model_all_config['colors']['LIGHTRED']),
-                "LIGHTYELLOW": eval(self.CAM2_model_all_config['colors']['LIGHTYELLOW']),
-                "LIGHTGREEN": eval(self.CAM2_model_all_config['colors']['LIGHTGREEN']),
-                "LIGHTALL": eval(self.CAM2_model_all_config['colors']['LIGHTALL']),
+                "NG": eval(self.CAM2_model_main_config['colors']['NG']),
+                "OK": eval(self.CAM2_model_main_config['colors']['OK']),
+                "OBJECT": eval(self.CAM2_model_main_config["colors"]["OBJECT"]),
+                "PANEL": eval(self.CAM2_model_main_config['colors']['PANEL']),
+                "FLOOR": eval(self.CAM2_model_main_config['colors']['FLOOR']),
+                "GLOVECHECK": eval(self.CAM2_model_main_config['colors']['GLOVECHECK']),
+                "SCISSORCHECK": eval(self.CAM2_model_main_config['colors']['SCISSORCHECK']),
+                "LIGHTRED": eval(self.CAM2_model_main_config['colors']['LIGHTRED']),
+                "LIGHTYELLOW": eval(self.CAM2_model_main_config['colors']['LIGHTYELLOW']),
+                "LIGHTGREEN": eval(self.CAM2_model_main_config['colors']['LIGHTGREEN']),
+                "LIGHTALL": eval(self.CAM2_model_main_config['colors']['LIGHTALL']),
             }
             # cabin_inside_monitor.CheckDeleteLog(self.CAM2_baseDir)
 
@@ -174,7 +174,7 @@ class CameraWorker(QObject):
             with open(self.CAM3_config_path, "r", encoding="utf8") as f:
                 config = yaml.load(f, Loader=yaml.FullLoader)
             self.CAM3_general_config = config["general"]
-            self.CAM3_model_all_config = config["model_All"]
+            self.CAM3_model_main_config = config["model_main"]
             self.CAM3_api = config["api"]
             self.CAM3_apicamsetting = self.CAM3_api["API"] + self.CAM3_api["CAMERA_SETTING"] + camip
             self.CAM3_post = self.CAM3_api["POST"]
@@ -185,14 +185,14 @@ class CameraWorker(QObject):
 
             cabin_outside_monitor.set_coordinates()
             # Load model detect
-            self.CAM3_model_All = cabin_outside_monitor.load_model(self.CAM3_model_all_config["weights"])
+            self.CAM3_model_main = cabin_outside_monitor.load_model(self.CAM3_model_main_config["weights"])
             # Set Color
             self.CAM3_colors = {
-                "NG": eval(self.CAM3_model_all_config['colors']['NG']),
-                "OK": eval(self.CAM3_model_all_config['colors']['OK']),
-                "OBJECT": eval(self.CAM3_model_all_config["colors"]["OBJECT"]),
-                "FLOOR": eval(self.CAM3_model_all_config['colors']['FLOOR']),
-                "GATHER": eval(self.CAM3_model_all_config['colors']['GATHER'])
+                "NG": eval(self.CAM3_model_main_config['colors']['NG']),
+                "OK": eval(self.CAM3_model_main_config['colors']['OK']),
+                "OBJECT": eval(self.CAM3_model_main_config["colors"]["OBJECT"]),
+                "FLOOR": eval(self.CAM3_model_main_config['colors']['FLOOR']),
+                "GATHER": eval(self.CAM3_model_main_config['colors']['GATHER'])
             }
             # cabin_outside_monitor.CheckDeleteLog(self.CAM3_baseDir)
         else:
@@ -268,7 +268,7 @@ class CameraWorker(QObject):
 
                     if self.cam == "F1-COP1-05":
                         line_safety_monitor.draw_rectangles(frame_copy, self.CAM1_colors)
-                        results = self.CAM1_model_All(source=frame, conf=self.CAM1_model_all_config["conf"])
+                        results = self.CAM1_model_main(source=frame, conf=self.CAM1_model_main_config["conf"])
                         frame = line_safety_monitor.process_results(results, frame_copy, frame, self.CAM1_colors, self.CAM1_model_keo, cap)
                         if self.chooseCam_ == 1:
                             if self.stopCam_ == 1:
@@ -278,7 +278,7 @@ class CameraWorker(QObject):
 
                     if self.cam == "F1-COP1-S1":
                         cabin_inside_monitor.draw_rectangles(frame_copy, self.CAM2_colors)
-                        results = self.CAM2_model_All(source=frame, conf=self.CAM2_model_all_config["conf"])
+                        results = self.CAM2_model_main(source=frame, conf=self.CAM2_model_main_config["conf"])
                         frame = cabin_inside_monitor.process_results(results, frame_copy, frame, self.CAM2_colors, cap)
                         if self.chooseCam_ == 2:
                             if self.stopCam_ == 2:
@@ -288,7 +288,7 @@ class CameraWorker(QObject):
 
                     if self.cam == "F1-COP1-04":
                         cabin_outside_monitor.draw_rectangles(frame_copy, self.CAM3_colors)
-                        results = self.CAM3_model_All(source=frame, conf=self.CAM3_model_all_config["conf"])
+                        results = self.CAM3_model_main(source=frame, conf=self.CAM3_model_main_config["conf"])
                         frame = cabin_outside_monitor.process_results(results, frame_copy, frame, self.CAM3_colors, cap)
                         if self.chooseCam_ == 3:
                             if self.stopCam_ == 3:

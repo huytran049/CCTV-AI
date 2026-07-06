@@ -12,7 +12,7 @@ general:
   max_retries: 5
   retry_delay: 5
 
-model_All:
+model_main:
   weights: ''
   weights_Keo: ''
   imgsz: 640

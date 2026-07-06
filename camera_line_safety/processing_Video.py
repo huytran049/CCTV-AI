@@ -57,7 +57,7 @@ class SSGVision:
             config = yaml.load(f, Loader=yaml.FullLoader)
         self.CAM1_general_config = config["general"]
         self.CAM1_UseThreadCap = self.CAM1_general_config["ThreadCap"]
-        self.CAM1_model_all_config = config["model_All"]
+        self.CAM1_model_main_config = config["model_main"]
         self.CAM1_roll_warning = config["accept_roll"]
         self.CAM1_scissor_warning = config["Scissor_warning"]
         self.CAM1_lightbox = config["lightBox"]
@@ -72,7 +72,7 @@ class SSGVision:
         self.CAM1_auto_restart = self.CAM1_general_config['autoRestart']
         self.CAM1_output_path = self.CAM1_general_config['output']
         self.CAM1_device_setting = self.CAM1_general_config['device']
-        self.CAM1_imgsz = self.CAM1_model_all_config['imgsz']
+        self.CAM1_imgsz = self.CAM1_model_main_config['imgsz']
         self.CAM1_apicamsetting = self.CAM1_api["API"] + self.CAM1_api["CAMERA_SETTING"]
         self.CAM1_apiabnormal = self.CAM1_api["API"] + self.CAM1_api["ABNORMAL"]
         self.CAM1_apimedia = self.CAM1_api["API"] + self.CAM1_api["MEDIA"]
@@ -86,18 +86,18 @@ class SSGVision:
         self.CAM1_duration = 0
         # Set Color
         self.CAM1_colors = {
-            "NG": eval(self.CAM1_model_all_config['colors']['NG']),
-            "OK": eval(self.CAM1_model_all_config['colors']['OK']),
-            "OBJECT": eval(self.CAM1_model_all_config["colors"]["OBJECT"]),
-            "CABIN": eval(self.CAM1_model_all_config['colors']['CABIN']),
-            "PANEL": eval(self.CAM1_model_all_config['colors']['PANEL']),
-            "LIGHTRED": eval(self.CAM1_model_all_config['colors']['LIGHTRED']),
-            "LIGHTYELLOW": eval(self.CAM1_model_all_config['colors']['LIGHTYELLOW']),
-            "LIGHTGREEN": eval(self.CAM1_model_all_config['colors']['LIGHTGREEN']),
-            "LIGHTALL": eval(self.CAM1_model_all_config['colors']['LIGHTALL']),
-            "FLOOR": eval(self.CAM1_model_all_config['colors']['FLOOR']),
-            "SCISSORCHECK": eval(self.CAM1_model_all_config['colors']['SCISSORCHECK']),
-            "GATHER": eval(self.CAM1_model_all_config['colors']['GATHER']),
+            "NG": eval(self.CAM1_model_main_config['colors']['NG']),
+            "OK": eval(self.CAM1_model_main_config['colors']['OK']),
+            "OBJECT": eval(self.CAM1_model_main_config["colors"]["OBJECT"]),
+            "CABIN": eval(self.CAM1_model_main_config['colors']['CABIN']),
+            "PANEL": eval(self.CAM1_model_main_config['colors']['PANEL']),
+            "LIGHTRED": eval(self.CAM1_model_main_config['colors']['LIGHTRED']),
+            "LIGHTYELLOW": eval(self.CAM1_model_main_config['colors']['LIGHTYELLOW']),
+            "LIGHTGREEN": eval(self.CAM1_model_main_config['colors']['LIGHTGREEN']),
+            "LIGHTALL": eval(self.CAM1_model_main_config['colors']['LIGHTALL']),
+            "FLOOR": eval(self.CAM1_model_main_config['colors']['FLOOR']),
+            "SCISSORCHECK": eval(self.CAM1_model_main_config['colors']['SCISSORCHECK']),
+            "GATHER": eval(self.CAM1_model_main_config['colors']['GATHER']),
         }
         # Initialize required parameter for check light indicator
         # self.CAM1_pre_mean_Red = 0

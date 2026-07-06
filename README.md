@@ -194,7 +194,7 @@ general:
   MaxRetry: 10                         # Số lần retry tối đa
   device: 0                            # GPU device ID (0=GPU, CPU=other)
 
-model_All:
+model_main:
   weights: 
   weights_Keo: 
   imgsz: 640                           # Kích thước input model

@@ -49,7 +49,7 @@ class SSGVision:
             config = yaml.load(f, Loader=yaml.FullLoader)
         self.CAM2_general_config = config["general"]
         self.CAM2_UseThreadCap = self.CAM2_general_config["ThreadCap"]
-        self.CAM2_model_all_config = config["model_All"]
+        self.CAM2_model_main_config = config["model_main"]
         self.CAM2_lightbox = config["lightBox"]
         self.CAM2_glovedBox = config["glovedBox"]
         self.CAM2_scissorBox = config["scissorBox"]
@@ -62,14 +62,14 @@ class SSGVision:
         self.CAM2_auto_restart = self.CAM2_general_config['autoRestart']
         self.CAM2_output_path = self.CAM2_general_config['output']
         self.CAM2_device_setting = self.CAM2_general_config['device']
-        self.CAM2_imgsz = self.CAM2_model_all_config['imgsz']
+        self.CAM2_imgsz = self.CAM2_model_main_config['imgsz']
         self.CAM2_apicamsetting = self.CAM2_api["API"] + self.CAM2_api["CAMERA_SETTING"]
         self.CAM2_apiabnormal = self.CAM2_api["API"] + self.CAM2_api["ABNORMAL"]
         self.CAM2_apimedia = self.CAM2_api["API"] + self.CAM2_api["MEDIA"]
         self.CAM2_post = self.CAM2_api["POST"]
 
         # Load model detect
-        self.CAM2_model_All = self.load_model(self.CAM2_model_all_config["weights"])
+        self.CAM2_model_main = self.load_model(self.CAM2_model_main_config["weights"])
         # Record Camera
         self.CAM2_desired_width = 1920
         self.CAM2_desired_height = 1080
@@ -78,17 +78,17 @@ class SSGVision:
 
         # Set Color
         self.CAM2_colors = {
-            "NG": eval(self.CAM2_model_all_config['colors']['NG']),
-            "OK": eval(self.CAM2_model_all_config['colors']['OK']),
-            "OBJECT": eval(self.CAM2_model_all_config["colors"]["OBJECT"]),
-            "PANEL": eval(self.CAM2_model_all_config['colors']['PANEL']),
-            "FLOOR": eval(self.CAM2_model_all_config['colors']['FLOOR']),
-            "GLOVECHECK": eval(self.CAM2_model_all_config['colors']['GLOVECHECK']),
-            "SCISSORCHECK": eval(self.CAM2_model_all_config['colors']['SCISSORCHECK']),
-            "LIGHTRED": eval(self.CAM2_model_all_config['colors']['LIGHTRED']),
-            "LIGHTYELLOW": eval(self.CAM2_model_all_config['colors']['LIGHTYELLOW']),
-            "LIGHTGREEN": eval(self.CAM2_model_all_config['colors']['LIGHTGREEN']),
-            "LIGHTALL": eval(self.CAM2_model_all_config['colors']['LIGHTALL']),
+            "NG": eval(self.CAM2_model_main_config['colors']['NG']),
+            "OK": eval(self.CAM2_model_main_config['colors']['OK']),
+            "OBJECT": eval(self.CAM2_model_main_config["colors"]["OBJECT"]),
+            "PANEL": eval(self.CAM2_model_main_config['colors']['PANEL']),
+            "FLOOR": eval(self.CAM2_model_main_config['colors']['FLOOR']),
+            "GLOVECHECK": eval(self.CAM2_model_main_config['colors']['GLOVECHECK']),
+            "SCISSORCHECK": eval(self.CAM2_model_main_config['colors']['SCISSORCHECK']),
+            "LIGHTRED": eval(self.CAM2_model_main_config['colors']['LIGHTRED']),
+            "LIGHTYELLOW": eval(self.CAM2_model_main_config['colors']['LIGHTYELLOW']),
+            "LIGHTGREEN": eval(self.CAM2_model_main_config['colors']['LIGHTGREEN']),
+            "LIGHTALL": eval(self.CAM2_model_main_config['colors']['LIGHTALL']),
         }
         # Initialize required parameter for check light indicator 
         self.CAM2_pre_mean_Red = 0
