@@ -1,0 +1,62 @@
+general:
+  source: ''
+  autoRestart: True
+  autoRestartAPI: true
+  output: "output/result"
+  device: 0
+  save: False
+  show: True
+  ThreadCap: False
+  MaxRetry: 10
+  MaxRetryAPI: 10
+  max_retries: 5
+  retry_delay: 5
+
+model_All:
+  weights: ''
+  imgsz: 640
+  conf: 0.5
+  iou: 0.5
+  colors:
+    NG: (0, 0, 255)
+    OK: (0, 255, 0)
+    OBJECT: (255, 0, 0)
+    FLOOR: (42, 42, 128)
+    GATHER: (255, 255, 255)
+
+accept_roll:
+  ROI1:
+    Count : 6
+    point1: (1020, 702)
+    point2: (1040, 724)
+    point3: (875, 784)
+    point4: (808, 694)  
+    point5: (838, 685)
+    point6: (890, 749)  
+  ROI2: 
+    Count : 4
+    point1: (754, 586)
+    point2: (906, 773)
+    point3: (652, 854)
+    point4: (543, 659)  
+
+# gather_warning:
+#   Count: 4
+#   point1: (477, 589)
+#   point2: (1012, 274)
+#   point3: (1500, 1077)
+#   point4: (791, 1076)
+
+gather_warning:
+  Count: 4
+  point1: (660, 930)
+  point2: (1310, 674)
+  point3: (1067, 267)
+  point4: (423, 492)
+  
+api:
+  API: ''
+  CAMERA_SETTING: GetCamSetting?
+  ABNORMAL: SaveAbnormalLog
+  MEDIA: SaveImage
+  POST: True

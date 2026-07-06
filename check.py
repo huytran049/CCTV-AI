@@ -1,12 +1,12 @@
-from urllib import response
+﻿from urllib import response
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtCore import QObject, QThread, pyqtSignal, Qt, QTimer, QStringListModel
 from PyQt6.QtWidgets import QGraphicsScene, QGraphicsPixmapItem, QStatusBar, QLabel, QTableWidgetItem
 from PyQt6.QtGui import QImage, QPixmap
 import cv2
-from CBInside import cam2
-from CBOutside import cam3
-from SSGLogic import cam1
+from camera_cabin_inside import cabin_inside_camera
+from camera_cabin_outside import cabin_outside_camera
+from camera_line_safety import line_safety_camera
 import time
 import yaml
 import threading
@@ -23,24 +23,24 @@ import configparser
 import json
 from logging.handlers import TimedRotatingFileHandler
 from dateutil import parser  
-cbinside = cam2.SSGVision(config_path="CBInside/config.yaml")
-cboutside = cam3.SSGVision(config_path="CBOutside/config.yaml")
-logic = cam1.SSGVision(config_path="SSGLogic/config.yaml")
+cabin_inside_monitor = cabin_inside_camera.SSGVision(config_path="camera_cabin_inside/config.yaml")
+cabin_outside_monitor = cabin_outside_camera.SSGVision(config_path="camera_cabin_outside/config.yaml")
+line_safety_monitor = line_safety_camera.SSGVision(config_path="camera_line_safety/config.yaml")
 
 # def setup_daily_logger(log_folder, logger_name):
-#     """Cấu hình logger theo ngày với xử lý lỗi."""
+#     """Cáº¥u hÃ¬nh logger theo ngÃ y vá»›i xá»­ lÃ½ lá»—i."""
 #     try:
-#         # Tạo thư mục log nếu chưa tồn tại
+#         # Táº¡o thÆ° má»¥c log náº¿u chÆ°a tá»“n táº¡i
 #         log_dir = os.path.join(log_folder, logger_name)
 #         if not os.path.exists(log_dir):
 #             os.makedirs(log_dir)
 
-#         # Tạo file log theo ngày
+#         # Táº¡o file log theo ngÃ y
 #         log_file = os.path.join(log_dir, f"{date.today().strftime('%Y-%m-%d')}.log")
 
-#         # Lấy hoặc khởi tạo logger
+#         # Láº¥y hoáº·c khá»Ÿi táº¡o logger
 #         logger = logging.getLogger(logger_name)
-#         if not logger.handlers:  # Đảm bảo không thêm handler lặp lại
+#         if not logger.handlers:  # Äáº£m báº£o khÃ´ng thÃªm handler láº·p láº¡i
 #             handler = logging.FileHandler(log_file, mode='a')
 #             formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 #             handler.setFormatter(formatter)
@@ -48,10 +48,10 @@ logic = cam1.SSGVision(config_path="SSGLogic/config.yaml")
 #             logger.setLevel(logging.INFO)
 #             logger.info("Logger initialized successfully")
 
-#         # Đảm bảo logger ghi vào đúng file theo ngày
+#         # Äáº£m báº£o logger ghi vÃ o Ä‘Ãºng file theo ngÃ y
 #         current_log_file = logger.handlers[0].baseFilename
 #         if current_log_file != log_file:
-#             # Xóa handler cũ và thêm handler mới
+#             # XÃ³a handler cÅ© vÃ  thÃªm handler má»›i
 #             logger.handlers = []
 #             handler = logging.FileHandler(log_file, mode='a')
 #             formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
@@ -90,7 +90,7 @@ class CameraWorker(QObject):
         if not os.path.exists(self.baseDir+"/log"):
             os.makedirs(self.baseDir+"/log")
         self.configure_logging()
-        # Khởi tạo logger riêng cho CameraWorker
+        # Khá»Ÿi táº¡o logger riÃªng cho CameraWorker
         # self.logger = setup_daily_logger(log_folder, logger_name)
     def configure_logging(self):
         logger = logging.getLogger()
@@ -161,15 +161,15 @@ class CameraWorker(QObject):
             self.CAM1_apicamsetting = self.CAM1_api["API"] + self.CAM1_api["CAMERA_SETTING"] + camip
             self.CAM1_post = self.CAM1_api["POST"]
             if self.CAM1_post:
-                self.CAM1_data_cam = logic.readCam_api(self.CAM1_apicamsetting)
+                self.CAM1_data_cam = line_safety_monitor.readCam_api(self.CAM1_apicamsetting)
                 
                 if self.CAM1_data_cam is not None:
-                    logic.set_params(self.CAM1_data_cam)
+                    line_safety_monitor.set_params(self.CAM1_data_cam)
             # Set up Box of Cabin, Panel, Floor and Light indicator position
-            logic.set_coordinates()
+            line_safety_monitor.set_coordinates()
             # Load model detect
-            self.CAM1_model_All = logic.load_modelv10(self.CAM1_model_all_config["weights"])
-            self.CAM1_model_keo = logic.load_modelv10(self.CAM1_model_all_config["weights_Keo"])
+            self.CAM1_model_All = line_safety_monitor.load_modelv10(self.CAM1_model_all_config["weights"])
+            self.CAM1_model_keo = line_safety_monitor.load_modelv10(self.CAM1_model_all_config["weights_Keo"])
             # Set Color
             self.CAM1_colors = {
                 "NG": eval(self.CAM1_model_all_config['colors']['NG']),
@@ -185,7 +185,7 @@ class CameraWorker(QObject):
                 "SCISSORCHECK": eval(self.CAM1_model_all_config['colors']['SCISSORCHECK']),
                 "GATHER": eval(self.CAM1_model_all_config['colors']['GATHER']),
             }
-            # logic.CheckDeleteLog(self.CAM1_baseDir)
+            # line_safety_monitor.CheckDeleteLog(self.CAM1_baseDir)
 
         elif cam == "F1-COP1-S1":
             self.CAM2_config_path = config_path
@@ -204,13 +204,13 @@ class CameraWorker(QObject):
             self.CAM2_apicamsetting = self.CAM2_api["API"] + self.CAM2_api["CAMERA_SETTING"] + camip
             self.CAM2_post = self.CAM2_api["POST"]
             if self.CAM2_post:
-                self.CAM2_data_cam = cbinside.readCam_api(self.CAM2_apicamsetting)
+                self.CAM2_data_cam = cabin_inside_monitor.readCam_api(self.CAM2_apicamsetting)
                 if self.CAM2_data_cam is not None:
-                    cbinside.set_params(self.CAM2_data_cam)
+                    cabin_inside_monitor.set_params(self.CAM2_data_cam)
             # Set up Box of Panel position
-            cbinside.set_coordinates()
+            cabin_inside_monitor.set_coordinates()
             # Load model detect
-            self.CAM2_model_All = cbinside.load_modelv10(self.CAM2_model_all_config["weights"])
+            self.CAM2_model_All = cabin_inside_monitor.load_modelv10(self.CAM2_model_all_config["weights"])
             # Set Color
             self.CAM2_colors = {
                 "NG": eval(self.CAM2_model_all_config['colors']['NG']),
@@ -225,7 +225,7 @@ class CameraWorker(QObject):
                 "LIGHTGREEN": eval(self.CAM2_model_all_config['colors']['LIGHTGREEN']),
                 "LIGHTALL": eval(self.CAM2_model_all_config['colors']['LIGHTALL']),
             }
-            # cbinside.CheckDeleteLog(self.CAM2_baseDir)
+            # cabin_inside_monitor.CheckDeleteLog(self.CAM2_baseDir)
 
         elif cam == "F1-COP1-04":
             self.CAM3_config_path = config_path
@@ -244,13 +244,13 @@ class CameraWorker(QObject):
             self.CAM3_apicamsetting = self.CAM3_api["API"] + self.CAM3_api["CAMERA_SETTING"] + camip
             self.CAM3_post = self.CAM3_api["POST"]
             if self.CAM3_post:
-                self.CAM3_data_cam = cboutside.readCam_api(self.CAM3_apicamsetting)
+                self.CAM3_data_cam = cabin_outside_monitor.readCam_api(self.CAM3_apicamsetting)
                 if self.CAM3_data_cam is not None:
-                    cboutside.set_params(self.CAM3_data_cam)
+                    cabin_outside_monitor.set_params(self.CAM3_data_cam)
 
-            cboutside.set_coordinates()
+            cabin_outside_monitor.set_coordinates()
             # Load model detect
-            self.CAM3_model_All = cboutside.load_modelv10(self.CAM3_model_all_config["weights"])
+            self.CAM3_model_All = cabin_outside_monitor.load_modelv10(self.CAM3_model_all_config["weights"])
             # Set Color
             self.CAM3_colors = {
                 "NG": eval(self.CAM3_model_all_config['colors']['NG']),
@@ -259,7 +259,7 @@ class CameraWorker(QObject):
                 "FLOOR": eval(self.CAM3_model_all_config['colors']['FLOOR']),
                 "GATHER": eval(self.CAM3_model_all_config['colors']['GATHER'])
             }
-            # cboutside.CheckDeleteLog(self.CAM3_baseDir)
+            # cabin_outside_monitor.CheckDeleteLog(self.CAM3_baseDir)
         else:
             self.camName = None
             while self.camName is None:
@@ -319,9 +319,9 @@ class CameraWorker(QObject):
                     frame_copy = frame.copy()
                     self.Cam.setIcon(self.iconRun)
                     if self.cam == "F1-COP1-05":
-                        logic.draw_rectangles(frame_copy, self.CAM1_colors)
+                        line_safety_monitor.draw_rectangles(frame_copy, self.CAM1_colors)
                         results = self.CAM1_model_All(source=frame, conf=self.CAM1_model_all_config["conf"])  
-                        frame = logic.process_results(results, frame_copy, frame, self.CAM1_colors, self.CAM1_model_keo, cap)
+                        frame = line_safety_monitor.process_results(results, frame_copy, frame, self.CAM1_colors, self.CAM1_model_keo, cap)
                         if self.chooseCam_ == 1:
                             if self.stopCam_ == 1:
                                 continue
@@ -329,9 +329,9 @@ class CameraWorker(QObject):
                                 self.frameCaptured.emit(frame)
 
                     if self.cam == "F1-COP1-S1":
-                        cbinside.draw_rectangles(frame_copy, self.CAM2_colors)
+                        cabin_inside_monitor.draw_rectangles(frame_copy, self.CAM2_colors)
                         results = self.CAM2_model_All(source=frame, conf=self.CAM2_model_all_config["conf"])  
-                        frame = cbinside.process_results(results, frame_copy, frame, self.CAM2_colors, cap)
+                        frame = cabin_inside_monitor.process_results(results, frame_copy, frame, self.CAM2_colors, cap)
                         if self.chooseCam_ == 2:
                             if self.stopCam_ == 2:
                                 continue
@@ -339,9 +339,9 @@ class CameraWorker(QObject):
                                 self.frameCaptured.emit(frame)
                     
                     if self.cam == "F1-COP1-04":
-                        cboutside.draw_rectangles(frame_copy, self.CAM3_colors)
+                        cabin_outside_monitor.draw_rectangles(frame_copy, self.CAM3_colors)
                         results = self.CAM3_model_All(source=frame, conf=self.CAM3_model_all_config["conf"])  
-                        frame = cboutside.process_results(results, frame_copy, frame, self.CAM3_colors, cap)
+                        frame = cabin_outside_monitor.process_results(results, frame_copy, frame, self.CAM3_colors, cap)
                         if self.chooseCam_ == 3:
                             if self.stopCam_ == 3:
                                 continue
@@ -358,7 +358,7 @@ class CameraWorker(QObject):
         self.running = False
 
 class PLC_Advantech(QObject):
-    statusUpdated = pyqtSignal(str)  # Tín hiệu gửi trạng thái cho giao diện
+    statusUpdated = pyqtSignal(str)  # TÃ­n hiá»‡u gá»­i tráº¡ng thÃ¡i cho giao diá»‡n
 
     def __init__(self, log_folder="logs"):
         super().__init__()
@@ -369,7 +369,7 @@ class PLC_Advantech(QObject):
         self.logger = self.setup_daily_logger()
 
     def setup_daily_logger(self):
-        """Cấu hình logger theo ngày"""
+        """Cáº¥u hÃ¬nh logger theo ngÃ y"""
         if not os.path.exists(self.log_folder):
             os.makedirs(self.log_folder)
 
@@ -378,18 +378,18 @@ class PLC_Advantech(QObject):
             filename=log_file,
             level=logging.INFO,
             format="%(asctime)s - %(levelname)s - %(message)s",
-            filemode='a'  # Append nếu file đã tồn tại
+            filemode='a'  # Append náº¿u file Ä‘Ã£ tá»“n táº¡i
         )
         return logging.getLogger()
 
     def check_date(self):
-        """Kiểm tra ngày, nếu khác ngày hiện tại thì tạo file log mới"""
+        """Kiá»ƒm tra ngÃ y, náº¿u khÃ¡c ngÃ y hiá»‡n táº¡i thÃ¬ táº¡o file log má»›i"""
         if date.today() != self.current_date:
             self.current_date = date.today()
             self.logger = self.setup_daily_logger()
 
     def connect(self, ip, port=5000):
-        """Kết nối tới thiết bị Advantech"""
+        """Káº¿t ná»‘i tá»›i thiáº¿t bá»‹ Advantech"""
         self.check_date()
         try:
             self.logger.info(f"Attempting to connect to {ip}:{port}")
@@ -406,7 +406,7 @@ class PLC_Advantech(QObject):
             self.logger.exception(f"Error connecting to {ip}:{port}: {e}")
 
     def disconnect(self):
-        """Ngắt kết nối thiết bị"""
+        """Ngáº¯t káº¿t ná»‘i thiáº¿t bá»‹"""
         self.check_date()
         if self.client:
             self.client.close()
@@ -415,18 +415,18 @@ class PLC_Advantech(QObject):
             self.logger.info("Disconnected to PLC")
 
     def read_DI(self, register, value):
-        """Đọc trạng thái từ Discrete Input (DI)"""
+        """Äá»c tráº¡ng thÃ¡i tá»« Discrete Input (DI)"""
         self.check_date()
         if self.client and self.connected:
             try:
-                # Đọc Discrete Input (DI) từ địa chỉ register
-                result = self.client.read_discrete_inputs(register, 1)  # Đọc 1 bit từ DI
+                # Äá»c Discrete Input (DI) tá»« Ä‘á»‹a chá»‰ register
+                result = self.client.read_discrete_inputs(register, 1)  # Äá»c 1 bit tá»« DI
                 if result.isError():
                     self.statusUpdated.emit(f"Error reading DI at address {register}")
                     self.logger.error(f"Error reading DI at address {register}")
                     return None
                 self.logger.info(f"Read value {result.bits[0]} from DI address {register}")
-                value == result.bits[0]  # Trả về trạng thái của DI (True/False)
+                value == result.bits[0]  # Tráº£ vá» tráº¡ng thÃ¡i cá»§a DI (True/False)
                 self.logger.info(f"DI: {value}")
                 return value
             except Exception as e:
@@ -438,11 +438,11 @@ class PLC_Advantech(QObject):
             return None
 
     def write_DO(self, register, value):
-        """Ghi giá trị vào Digital Output (DO) và ghi nhận trạng thái"""
+        """Ghi giÃ¡ trá»‹ vÃ o Digital Output (DO) vÃ  ghi nháº­n tráº¡ng thÃ¡i"""
         self.check_date()
         if self.client and self.connected:
             try:
-                # Ghi giá trị vào Coil (DO)
+                # Ghi giÃ¡ trá»‹ vÃ o Coil (DO)
                 result = self.client.write_coil(register, value)
                 if result.isError():
                     self.statusUpdated.emit(f"Error writing {value} to DO at address {register}")
@@ -452,7 +452,7 @@ class PLC_Advantech(QObject):
                 self.logger.info(f"Successfully written {value} to DO address {register}")
                 self.statusUpdated.emit(f"Successfully written {value} to DO address {register}")
                 return True
-                # # Đọc lại giá trị từ DO sau khi ghi
+                # # Äá»c láº¡i giÃ¡ trá»‹ tá»« DO sau khi ghi
                 # read_result = self.client.read_coils(register, 1)
                 # if read_result.isError():
                 #     self.statusUpdated.emit(f"Error verifying DO at address {register}")
@@ -500,7 +500,7 @@ class Ui_MainWindow(object):
         self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
         self.centralwidget.setObjectName("centralwidget")
 
-        # Khởi tạo PLC_Advantech
+        # Khá»Ÿi táº¡o PLC_Advantech
         self.plc = PLC_Advantech(log_folder=os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "log"))
         self.plc.statusUpdated.connect(self.update_plc_status)
 
@@ -629,13 +629,13 @@ class Ui_MainWindow(object):
         self.cameraWorker_cam2.set_icon(self.F1_COP1_S1)
         self.cameraWorker_cam3.set_icon(self.F1_COP1_04)
 
-        # Thêm các thành phần giao diện database
+        # ThÃªm cÃ¡c thÃ nh pháº§n giao diá»‡n database
         self.dataNewGroupBox = QtWidgets.QGroupBox(parent=self.centralwidget)
         self.dataNewGroupBox.setTitle("Data Alarm New")
         self.dataNewGroupBox.setFixedHeight(100)
         self.dataNewlayout = QtWidgets.QVBoxLayout(self.dataNewGroupBox)
 
-        # Tạo bảng cho groupbox datanew
+        # Táº¡o báº£ng cho groupbox datanew
         self.newtable = QtWidgets.QTableWidget(1, 6, parent=self.centralwidget)
         self.newtable.setColumnCount(6)
         self.newtable.setHorizontalHeaderLabels(["CamIP", "CamPort", "CamName", "LineID", "AbnormalType", "AbnormalDateTime"])
@@ -644,19 +644,19 @@ class Ui_MainWindow(object):
         self.newtable.setColumnWidth(2, 200)
         self.newtable.setColumnWidth(3, 70)
         self.newtable.setColumnWidth(4, 350)
-        self.newtable.horizontalHeader().setStretchLastSection(True) # Để cột cuối cùng co giãn
-        self.newtable.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers) # Không cho chỉnh sửa
+        self.newtable.horizontalHeader().setStretchLastSection(True) # Äá»ƒ cá»™t cuá»‘i cÃ¹ng co giÃ£n
+        self.newtable.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers) # KhÃ´ng cho chá»‰nh sá»­a
         self.dataNewlayout.addWidget(self.newtable)
 
         self.rightLayout.addWidget(self.dataNewGroupBox)
 
-        # Thêm các thành phần giao diện database
+        # ThÃªm cÃ¡c thÃ nh pháº§n giao diá»‡n database
         self.dataOldGroupBox = QtWidgets.QGroupBox(parent=self.centralwidget)
         self.dataOldGroupBox.setTitle("Data Alarm Old")
         self.dataOldGroupBox.setFixedHeight(100)
         self.dataOldlayout = QtWidgets.QVBoxLayout(self.dataOldGroupBox)
 
-        # Tạo bảng cho groupbox dataold
+        # Táº¡o báº£ng cho groupbox dataold
         self.oldtable = QtWidgets.QTableWidget(1, 6, parent=self.centralwidget)
         self.oldtable.setColumnCount(6)
         self.oldtable.setHorizontalHeaderLabels(["CamIP", "CamPort", "CamName", "LineID", "AbnormalType", "AbnormalDateTime"])
@@ -665,19 +665,19 @@ class Ui_MainWindow(object):
         self.oldtable.setColumnWidth(2, 200)
         self.oldtable.setColumnWidth(3, 70)
         self.oldtable.setColumnWidth(4, 350)
-        self.oldtable.horizontalHeader().setStretchLastSection(True) # Để cột cuối cùng co giãn
-        self.oldtable.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers) # Không cho chỉnh sửa
+        self.oldtable.horizontalHeader().setStretchLastSection(True) # Äá»ƒ cá»™t cuá»‘i cÃ¹ng co giÃ£n
+        self.oldtable.setEditTriggers(QtWidgets.QAbstractItemView.EditTrigger.NoEditTriggers) # KhÃ´ng cho chá»‰nh sá»­a
         self.dataOldlayout.addWidget(self.oldtable)
 
         self.rightLayout.addWidget(self.dataOldGroupBox)
 
-        # Thêm các thành phần giao diện PLC
+        # ThÃªm cÃ¡c thÃ nh pháº§n giao diá»‡n PLC
         self.plcGroupBox = QtWidgets.QGroupBox(parent=self.centralwidget)
         self.plcGroupBox.setTitle("CCTV Alarm")
         self.plcGroupBox.setFixedWidth(400)
         self.plcLayout = QtWidgets.QVBoxLayout(self.plcGroupBox)
         
-        # Nhập IP và Port
+        # Nháº­p IP vÃ  Port
         self.plcIpInput = QtWidgets.QComboBox(self.plcGroupBox)
         self.plcIpInput.setPlaceholderText("Select PLC IP")
         # self.plcIpInput.addItems(plc_ips)
@@ -688,13 +688,13 @@ class Ui_MainWindow(object):
         # self.plcPortInput.setText(plc_port)
         self.plcLayout.addWidget(self.plcPortInput)
         
-        # Nút Connect và Disconnect
+        # NÃºt Connect vÃ  Disconnect
         self.plcConnectButton = QtWidgets.QPushButton("Connect PLC", self.plcGroupBox)
         self.plcDisconnectButton = QtWidgets.QPushButton("Disconnect PLC", self.plcGroupBox)
         self.plcLayout.addWidget(self.plcConnectButton)
         self.plcLayout.addWidget(self.plcDisconnectButton)
         
-        # Nút đọc/ghi DI và DO
+        # NÃºt Ä‘á»c/ghi DI vÃ  DO
         # self.readDIButton = QtWidgets.QPushButton("Read DI", self.plcGroupBox)
         self.writeDOButton = QtWidgets.QPushButton("Send Alarm", self.plcGroupBox)
         # self.readDIButton.clicked.connect(self.read_DI_action)
@@ -702,33 +702,33 @@ class Ui_MainWindow(object):
         # self.plcLayout.addWidget(self.readDIButton)
         self.plcLayout.addWidget(self.writeDOButton)
         
-        # Hiển thị trạng thái
+        # Hiá»ƒn thá»‹ tráº¡ng thÃ¡i
         self.plcStatusLabel = QtWidgets.QLabel("Status: Not Connected PLC", self.plcGroupBox)
         self.plcLayout.addWidget(self.plcStatusLabel)
         
-        # Thêm GroupBox PLC vào layout trái
+        # ThÃªm GroupBox PLC vÃ o layout trÃ¡i
         self.leftLayout.addWidget(self.plcGroupBox)
         
-        # Kết nối sự kiện
+        # Káº¿t ná»‘i sá»± kiá»‡n
         self.plcConnectButton.clicked.connect(self.connect_plc)
         self.plcDisconnectButton.clicked.connect(self.disconnect_plc)
         # self.readDIButton.clicked.connect(self.read_DI_action)
         self.writeDOButton.clicked.connect(self.write_DO_action)
 
-        # Thêm QStatusBar
+        # ThÃªm QStatusBar
         self.status_bar = QStatusBar(MainWindow)
         MainWindow.setStatusBar(self.status_bar)
 
-        # Thêm thông tin version
+        # ThÃªm thÃ´ng tin version
         self.version_label = QLabel(" Version: 1.0.0 ", self.status_bar)
         self.status_bar.addPermanentWidget(self.version_label)
 
-        # Thêm thời gian
+        # ThÃªm thá»i gian
         self.time_label = QLabel(" Date: 25/09/2024 ", self.status_bar)
         self.status_bar.addPermanentWidget(self.time_label)
         self.status_bar.setStyleSheet("background-color: #f0f0f0; color: #333; font-size: 15px; font-style: italic;")
 
-        config_file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "setting.ini") # Đường dẫn file config
+        config_file = os.path.join(os.path.abspath(os.path.dirname(__file__)), "setting.ini") # ÄÆ°á»ng dáº«n file config
         plc_ips, plc_port, version_text = self.load_config(config_file) 
         self.plcIpInput.addItems(plc_ips)
         self.plcPortInput.setText(plc_port)
@@ -746,17 +746,17 @@ class Ui_MainWindow(object):
         # self.start_cam2(camip='PKID=1', rtsp='//192.168.10.200/FA_Vision/2.SEI_AI_Camera/1.CCTVVideos/F1-COPPER 1_F1-COP1/F1-COP1-2/20240814/F1-COP1-02_20240814_CuonDong.mp4')
         # self.start_cam3(camip='PKID=1', rtsp='//92.168.10.200/FA_Vision/2.SEI_AI_Camera/1.CCTVVideos/F1-COPPER 1_F1-COP1/F1-COP1-04/20240802/Video_20240802164254/F1-COPPER 1_F1-COP1-04_20240802143941_20240802150541.mp4')
 
-        # Kết nối sự kiện khi nhấp chuột vào treeView
+        # Káº¿t ná»‘i sá»± kiá»‡n khi nháº¥p chuá»™t vÃ o treeView
         self.treeView.doubleClicked.connect(self.camSelect)
 
-        # Kết nối sự kiện đóng cửa sổ
+        # Káº¿t ná»‘i sá»± kiá»‡n Ä‘Ã³ng cá»­a sá»•
         MainWindow.closeEvent = self.on_close
 
-        # Khởi động Timer để cập nhật API mỗi 10 giây
+        # Khá»Ÿi Ä‘á»™ng Timer Ä‘á»ƒ cáº­p nháº­t API má»—i 10 giÃ¢y
         self.setup_timer()
 
     def show(self, pos):
-        """Hiển thị thông báo tại vị trí chỉ định."""
+        """Hiá»ƒn thá»‹ thÃ´ng bÃ¡o táº¡i vá»‹ trÃ­ chá»‰ Ä‘á»‹nh."""
         self.move(pos)
         super().show()
 
@@ -819,17 +819,17 @@ class Ui_MainWindow(object):
             self.scenePixmapItem.setPixmap(pixmap)
         self.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
     
-    # Phương thức dừng camera
+    # PhÆ°Æ¡ng thá»©c dá»«ng camera
     def stopCamera(self):
         self.cameraWorker.stop()
         self.thread.quit()
         self.thread.wait()
 
-    # Phương thức hiển thị hình ảnh theo tỷ lệ
+    # PhÆ°Æ¡ng thá»©c hiá»ƒn thá»‹ hÃ¬nh áº£nh theo tá»· lá»‡
     def fitInView(self, rect, aspectRatioMode):
         self.gvMain.fitInView(rect, aspectRatioMode)
 
-    # Phương thức hiển thị phiên bản
+    # PhÆ°Æ¡ng thá»©c hiá»ƒn thá»‹ phiÃªn báº£n
     def version(self):
         if self.tmpVersion == 0:
             self.tmpVersion = 1
@@ -838,7 +838,7 @@ class Ui_MainWindow(object):
             self.tmpVersion = 0
             self.groupBox_2.hide()
 
-    # Phương thức dừng camera
+    # PhÆ°Æ¡ng thá»©c dá»«ng camera
     def stop(self):
         self.scene.clear()
         self.scenePixmapItem = None
@@ -858,20 +858,20 @@ class Ui_MainWindow(object):
         # self.cameraWorker_cam2.set_stopCam(self.stopCam)
         # self.cameraWorker_cam3.set_stopCam(self.stopCam)
     
-    # Phương thức khởi chạy camera
+    # PhÆ°Æ¡ng thá»©c khá»Ÿi cháº¡y camera
     def start_cam1(self, camip, rtsp):
         self.cameraWorker_cam1.camera_index = rtsp
-        self.cameraWorker_cam1.setModel(self.F1_COP1_05.text(), 'SSGLogic/config.yaml', camip)
+        self.cameraWorker_cam1.setModel(self.F1_COP1_05.text(), 'camera_line_safety/config.yaml', camip)
         self.scene.clear()
         self.scenePixmapItem = None
         if not self.thread_cam1.isRunning():
             self.thread_cam1.started.connect(self.cameraWorker_cam1.run)
             self.thread_cam1.start()
 
-    # Phương thức khởi chạy camera
+    # PhÆ°Æ¡ng thá»©c khá»Ÿi cháº¡y camera
     def start_cam2(self, camip, rtsp):
         self.cameraWorker_cam2.camera_index = rtsp
-        self.cameraWorker_cam2.setModel(self.F1_COP1_S1.text(), 'CBInside/config.yaml', camip)
+        self.cameraWorker_cam2.setModel(self.F1_COP1_S1.text(), 'camera_cabin_inside/config.yaml', camip)
         self.scene.clear()
         self.scenePixmapItem = None
 
@@ -879,19 +879,19 @@ class Ui_MainWindow(object):
             self.thread_cam2.started.connect(self.cameraWorker_cam2.run)
             self.thread_cam2.start()
 
-    # Phương thức khởi chạy camera
+    # PhÆ°Æ¡ng thá»©c khá»Ÿi cháº¡y camera
     def start_cam3(self, camip, rtsp):
         self.cameraWorker_cam3.camera_index = rtsp
-        self.cameraWorker_cam3.setModel(self.F1_COP1_04.text(), 'CBOutside/config.yaml', camip)
+        self.cameraWorker_cam3.setModel(self.F1_COP1_04.text(), 'camera_cabin_outside/config.yaml', camip)
         self.scene.clear()
         self.scenePixmapItem = None
         if not self.thread_cam3.isRunning():
             self.thread_cam3.started.connect(self.cameraWorker_cam3.run)
             self.thread_cam3.start()
 
-    # Phương thức dừng tất cả camera
+    # PhÆ°Æ¡ng thá»©c dá»«ng táº¥t cáº£ camera
     def stop_all(self):
-        # Dừng tất cả các camera
+        # Dá»«ng táº¥t cáº£ cÃ¡c camera
         if self.thread_cam1.isRunning():
             self.cameraWorker_cam1.stop()
             self.thread_cam1.quit()
@@ -907,20 +907,20 @@ class Ui_MainWindow(object):
             self.thread_cam3.quit()
             self.thread_cam3.wait()
 
-     # Phương thức cập nhật trạng thái PLC
+     # PhÆ°Æ¡ng thá»©c cáº­p nháº­t tráº¡ng thÃ¡i PLC
 #endregion
 
 #region data
     def setup_timer(self):
         self.timer_reset = QTimer()
         self.timer_reset.timeout.connect(self.reset_Alarm)
-        self.timer_reset.start(500) # Cứ 0.5 giây chạy một lần
+        self.timer_reset.start(500) # Cá»© 0.5 giÃ¢y cháº¡y má»™t láº§n
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_camera_settings)
-        self.timer.start(10000) # Cứ 10 giây chạy một lần
+        self.timer.start(10000) # Cá»© 10 giÃ¢y cháº¡y má»™t láº§n
 
-        self.update_camera_settings()  # Cập nhật lần đầu tiên
+        self.update_camera_settings()  # Cáº­p nháº­t láº§n Ä‘áº§u tiÃªn
 
     def update_camera_settings(self):
         response = requests.get('http://10.212.10.234:81/api/GetTopCamSetting')
@@ -941,7 +941,7 @@ class Ui_MainWindow(object):
                         ,item.get("abnormalDateTime", "").replace("T", " ")] for item in data]
         print("List Selected: ", data_selected)
             
-        # Lấy dữ liệu hiện tại từ newtable
+        # Láº¥y dá»¯ liá»‡u hiá»‡n táº¡i tá»« newtable
         new_data = [
                     [self.newtable.item(row, col).text() if self.newtable.item(row, col) else ""
                     for col in range(self.newtable.columnCount())]
@@ -951,15 +951,15 @@ class Ui_MainWindow(object):
         print("normalize_data(data_selected): ", self.normalize_data(data_selected))
         print("normalize_data(new_data): ", self.normalize_data(new_data))
 
-        # So sánh dữ liệu mới và cũ
+        # So sÃ¡nh dá»¯ liá»‡u má»›i vÃ  cÅ©
         if self.normalize_data(data_selected) != self.normalize_data(new_data):
-                self.move_data_oldtable()  # Chuyển dữ liệu cũ sang oldtable
-                self.add_data_newtable(data)  # Cập nhật dữ liệu mới vào newtable
+                self.move_data_oldtable()  # Chuyá»ƒn dá»¯ liá»‡u cÅ© sang oldtable
+                self.add_data_newtable(data)  # Cáº­p nháº­t dá»¯ liá»‡u má»›i vÃ o newtable
                 if self.plc and self.plc.connected:
-                    self.send_Alarm() # Gửi dữ liệu mới qua PLC
+                    self.send_Alarm() # Gá»­i dá»¯ liá»‡u má»›i qua PLC
 
     def add_data_newtable(self, data):
-        self.newtable.setRowCount(len(data))  # Cập nhật số dòng
+        self.newtable.setRowCount(len(data))  # Cáº­p nháº­t sá»‘ dÃ²ng
         
         list_abnormalType = ["No_Use_Glove"
                             ,"Material_Roll_On_Floor"
@@ -969,7 +969,7 @@ class Ui_MainWindow(object):
                             ,"Lamp_Indicator_Was_Abnormal"]
         
         for row, rowData in enumerate(data):
-            abnormal_type = list_abnormalType[(rowData.get("abnormalType", 0) - 1)] if 1 <= rowData.get("abnormalType", 0) <= len(list_abnormalType) else "Unknown" # Lấy tên loại lỗi
+            abnormal_type = list_abnormalType[(rowData.get("abnormalType", 0) - 1)] if 1 <= rowData.get("abnormalType", 0) <= len(list_abnormalType) else "Unknown" # Láº¥y tÃªn loáº¡i lá»—i
 
             self.newtable.setItem(row, 0, QTableWidgetItem(str(rowData.get("camIP", ""))))
             self.newtable.setItem(row, 1, QTableWidgetItem(str(rowData.get("camPort", ""))))
@@ -979,7 +979,7 @@ class Ui_MainWindow(object):
             self.newtable.setItem(row, 5, QTableWidgetItem(rowData.get("abnormalDateTime", "").replace("T", " ")))
 
     def add_data_oldtable(self, data):
-        # Cập nhật bảng oldtable
+        # Cáº­p nháº­t báº£ng oldtable
         self.oldtable.setRowCount(len(data))
         for row, rowData in enumerate(data):
             for col, value in enumerate(rowData):
@@ -990,40 +990,40 @@ class Ui_MainWindow(object):
         col_count = self.newtable.columnCount()
         data = []
 
-        # Lấy dữ liệu từ bảng newtable
+        # Láº¥y dá»¯ liá»‡u tá»« báº£ng newtable
         for row in range(row_count):
             rowData = []
             for col in range(col_count):
                 item = self.newtable.item(row, col)
                 rowData.append(item.text() if item else "")
             data.append(rowData)
-        # Cập nhật bảng oldtable
+        # Cáº­p nháº­t báº£ng oldtable
         self.oldtable.setRowCount(len(data))
         for row, rowData in enumerate(data):
             for col, value in enumerate(rowData):
                 self.oldtable.setItem(row, col, QTableWidgetItem(value))
 
-        # Xóa dữ liệu trong newtable
+        # XÃ³a dá»¯ liá»‡u trong newtable
         self.newtable.setRowCount(0)
 
     def normalize_data(self, data):
-        # Chuẩn hóa dữ liệu
+        # Chuáº©n hÃ³a dá»¯ liá»‡u
         normalized = []
         for row in data:
-            normalized_row = [str(item) for item in row]  # Chuyển tất cả thành chuỗi
-            normalized.append("".join(re.findall(r'\w+', " ".join(normalized_row)))) # Loại bỏ các ký tự đặc biệt trừ "_"
+            normalized_row = [str(item) for item in row]  # Chuyá»ƒn táº¥t cáº£ thÃ nh chuá»—i
+            normalized.append("".join(re.findall(r'\w+', " ".join(normalized_row)))) # Loáº¡i bá» cÃ¡c kÃ½ tá»± Ä‘áº·c biá»‡t trá»« "_"
         return normalized
     
 #endregion
 
 #region PLC
-    # Phương thức cập nhật trạng thái PLC
+    # PhÆ°Æ¡ng thá»©c cáº­p nháº­t tráº¡ng thÃ¡i PLC
     def update_plc_status(self, status):
         self.plcStatusLabel.setText(f"Status: {status}")
     
-    # Phương thức kết nối PLC
+    # PhÆ°Æ¡ng thá»©c káº¿t ná»‘i PLC
     def connect_plc(self):
-        ip = self.plcIpInput.currentText()  # Lấy IP từ combobox
+        ip = self.plcIpInput.currentText()  # Láº¥y IP tá»« combobox
         if not ip:
             QtWidgets.QMessageBox.warning(self.centralwidget, "Invalid IP", "Please select a valid IP address!")
             return
@@ -1039,11 +1039,11 @@ class Ui_MainWindow(object):
         else:
             QtWidgets.QMessageBox.warning(self.centralwidget, "PLC Connection", f"Failed to connect to PLC at {ip}:{port}. Please check the device and network.")
     
-    # Phương thức ngắt kết nối PLC
+    # PhÆ°Æ¡ng thá»©c ngáº¯t káº¿t ná»‘i PLC
     def disconnect_plc(self):
         self.plc.disconnect()
     
-    # Phương thức đọc số (digital)
+    # PhÆ°Æ¡ng thá»©c Ä‘á»c sá»‘ (digital)
     def read_DI_action(self):
         register, ok = QtWidgets.QInputDialog.getInt(self.centralwidget, "Read DI", "Enter DI Address:")
         if ok:
@@ -1051,22 +1051,22 @@ class Ui_MainWindow(object):
             if result is not None:
                 QtWidgets.QMessageBox.information(self.centralwidget, "DI Value", f"Value: {result}")
     
-    # Phương thức ghi số (digital)
+    # PhÆ°Æ¡ng thá»©c ghi sá»‘ (digital)
     def write_DO_action(self):
-        """Thao tác ghi giá trị vào DO và kiểm tra lại trạng thái sau khi ghi"""
+        """Thao tÃ¡c ghi giÃ¡ trá»‹ vÃ o DO vÃ  kiá»ƒm tra láº¡i tráº¡ng thÃ¡i sau khi ghi"""
         # Test
-        # # Nhập địa chỉ DO cần ghi
+        # # Nháº­p Ä‘á»‹a chá»‰ DO cáº§n ghi
         # register, ok1 = QtWidgets.QInputDialog.getInt(self.centralwidget, "Write DO", "Enter DO Address:")
         # if not ok1:
         #     return
 
-        # # Nhập giá trị cần ghi (0 hoặc 1)
+        # # Nháº­p giÃ¡ trá»‹ cáº§n ghi (0 hoáº·c 1)
         # value, ok2 = QtWidgets.QInputDialog.getInt(self.centralwidget, "Write Value", "Enter Value (0 or 1):")
         # if ok2:
-        #     # Chuyển đổi giá trị nhập vào thành True (bật) hoặc False (tắt)
+        #     # Chuyá»ƒn Ä‘á»•i giÃ¡ trá»‹ nháº­p vÃ o thÃ nh True (báº­t) hoáº·c False (táº¯t)
         #     value = True if value == 1 else False
 
-        #     # Ghi giá trị vào DO và xác minh
+        #     # Ghi giÃ¡ trá»‹ vÃ o DO vÃ  xÃ¡c minh
         #     status = self.plc.write_DO(register, value)
         #     if status is not None:
         #         QtWidgets.QMessageBox.information(
@@ -1109,18 +1109,18 @@ class Ui_MainWindow(object):
         config = configparser.ConfigParser()
         config.read(file, encoding='utf-8')
 
-        # Lấy giá trị từ file Setting.ini
-        plc_ips = config.get('DEFAULT', 'IPAddressPLC', fallback="").split(",") # Lấy danh sách IP PLC
+        # Láº¥y giÃ¡ trá»‹ tá»« file Setting.ini
+        plc_ips = config.get('DEFAULT', 'IPAddressPLC', fallback="").split(",") # Láº¥y danh sÃ¡ch IP PLC
         plc_ips = [ip.strip() for ip in plc_ips]
-        plc_port = config.get('DEFAULT', 'PortPLC', fallback="5000").strip() # Lấy Port PLC
+        plc_port = config.get('DEFAULT', 'PortPLC', fallback="5000").strip() # Láº¥y Port PLC
 
         version_lines = []
         if config.has_section('VERSION'):
             version_lines = [f"{key} - {value}"
                              for key, value in config.items('VERSION')
-                             if key.lower() not in ['ipaddressplc', 'portplc']]  # Lấy thông tin version bỏ qua IP và Port
+                             if key.lower() not in ['ipaddressplc', 'portplc']]  # Láº¥y thÃ´ng tin version bá» qua IP vÃ  Port
         version_text = "\n".join(version_lines)
-        return plc_ips, plc_port, "\n".join(version_lines) # Trả về danh sách IP PLC, Port PLC, thông tin version
+        return plc_ips, plc_port, "\n".join(version_lines) # Tráº£ vá» danh sÃ¡ch IP PLC, Port PLC, thÃ´ng tin version
 
 
 if __name__ == "__main__":
@@ -1131,3 +1131,4 @@ if __name__ == "__main__":
     ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec())
+

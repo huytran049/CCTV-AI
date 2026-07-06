@@ -1,9 +1,9 @@
 [README.md](https://github.com/user-attachments/files/28204862/README.md)
-# Tài Liệu Giới Thiệu Dự Án: App-CCTV-AI - Hệ Thống Giám Sát An Toàn Lao Động
+# Tài Liệu Giới Thiệu Dự Án: Workplace-Safety-CCTV-AI - Hệ Thống Giám Sát An Toàn Lao Động
 
 ## 📋 Tổng Quan Dự Án
 
-**App-CCTV-AI** là một hệ thống giám sát thời gian thực dựa trên AI (Artificial Intelligence) và Computer Vision, được thiết kế để:
+**Workplace-Safety-CCTV-AI** là một hệ thống giám sát thời gian thực dựa trên AI (Artificial Intelligence) và Computer Vision, được thiết kế để:
 - Phát hiện các vi phạm an toàn lao động
 - Giám sát hành vi và tuân thủ an toàn tại các khu vực làm việc
 - Ghi nhận sự kiện bất thường và cảnh báo qua API
@@ -16,39 +16,39 @@ Hệ thống tích hợp **PyQt6 GUI**, **YOLOv10 Object Detection**, và **Cent
 ## 🏗️ Cấu Trúc Dự Án
 
 ```
-App-CCTV-AI/
+Workplace-Safety-CCTV-AI/
 ├── Application.py              # Ứng dụng GUI chính (PyQt6)
 ├── check.py                    # Module hỗ trợ kiểm tra
 ├── CameraCaptureWorker.py      # Thread capture video từ camera
 ├── CentroidTracker.py          # Theo dõi đối tượng bằng centroid
-├── App-CCTV-AI.bat             # Script chạy ứng dụng
+├── run_workplace_safety_cctv.bat             # Script chạy ứng dụng
 │
-├── SSGLogic/                   # Module cho Camera 1 (Logic Area)
-│   ├── cam1.py                 # Khởi tạo và cấu hình camera 1
+├── camera_line_safety/                    
+│   ├── line_safety_camera.py                 
 │   ├── processing_Video.py     # Xử lý video chính (YOLO + Detection)
 │   ├── CameraCaptureWorker.py  # Worker capture cho camera 1
 │   ├── CentroidTracker.py      # Tracker cho camera 1
 │   ├── CentroidTrackerHistory.py # Tracker có lịch sử cho camera 1
 │   ├── config.yaml             # File cấu hình (tham số detection, ROI)
-│   ├── ModelAll/               # Model YOLO chính
-│   └── ModelKeo/               # Model YOLO chuyên biệt (Scissor detection)
+│   ├── ModelMain/               # Model YOLO chính
+│   └── ModelScissor/               # Model YOLO chuyên biệt (Scissor detection)
 │
-├── CBInside/                   # Module cho Camera 2 (Ngoài - Inside)
-│   ├── cam2.py
+├── camera_cabin_inside/                   
+│   ├── cabin_inside_camera.py
 │   ├── processing_Video.py
 │   ├── CameraCaptureWorker.py
 │   ├── CentroidTracker.py
 │   ├── config.yaml
-│   └── ModelAll/
+│   └── ModelMain/
 │
-└── CBOutside/                  # Module cho Camera 3 (Ngoài - Outside)
-    ├── cam3.py
+└── camera_cabin_outside/                 
+    ├── cabin_outside_camera.py
     ├── processing_Video.py
     ├── CameraCaptureWorker.py
     ├── CentroidTracker.py
     ├── CentroidTrackerHistory.py
     ├── config.yaml
-    └── ModelAll/
+    └── ModelMain/
 ```
 
 ---
@@ -188,20 +188,19 @@ Mỗi camera có file `config.yaml` riêng chứa:
 
 ```yaml
 general:
-  source: "//192.168.10.200/..."       # URL camera hoặc video file
+  source: 
   autoRestart: true                    # Khởi động lại tự động khi lỗi
   ThreadCap: False                     # Sử dụng thread capture
   MaxRetry: 10                         # Số lần retry tối đa
   device: 0                            # GPU device ID (0=GPU, CPU=other)
 
 model_All:
-  weights: "SSGLogic/ModelAll/..."     # Đường dẫn model YOLO chính
-  weights_Keo: "SSGLogic/ModelKeo/..." # Model chuyên biệt cho kéo
+  weights: 
+  weights_Keo: 
   imgsz: 640                           # Kích thước input model
   conf: 0.5                            # Confidence threshold
   iou: 0.5                             # IOU threshold
 
-# Vùng phát hiện (ROI - Region of Interest)
 accept_roll:                           # Vùng kiểm tra cuộn vật liệu
   Count: 13
   point1-13: (x, y)                    # Tọa độ các điểm đa giác
@@ -281,7 +280,7 @@ api:
 ### **1. Khởi động**
 ```bash
 # Chạy từ batch file
-App-CCTV-AI.bat
+run_workplace_safety_cctv.bat
 
 # Hoặc chạy Python trực tiếp
 python Application.py
@@ -363,7 +362,7 @@ PyModbus             # Modbus TCP communication
 
 ## 🔄 Cấu Trúc Thư Mục Module
 
-Mỗi camera module (SSGLogic, CBInside, CBOutside) có cấu trúc giống nhau:
+Mỗi camera module (camera_line_safety, camera_cabin_inside, camera_cabin_outside) có cấu trúc giống nhau:
 
 ```
 CameraX/
@@ -373,7 +372,7 @@ CameraX/
 ├── CentroidTracker.py             # Basic tracker
 ├── CentroidTrackerHistory.py      # Tracker với lịch sử (nếu có)
 ├── config.yaml                    # Cấu hình detection & ROI
-├── ModelAll/                      # Thư mục chứa model YOLO chính
+├── ModelMain/                      # Thư mục chứa model YOLO chính
 │   └── All_V8_{date}_best.pt      # Model weights
 └── ModelKeo/ (optional)           # Model chuyên biệt (ví dụ: scissor detection)
     └── All_v8_{date}_best.pt      # Model weights
@@ -420,4 +419,4 @@ CameraX/
 
 ---
 
-**Tài liệu này được tạo để giúp các nhà phát triển và người dùng hiểu rõ cấu trúc, chức năng và hoạt động của hệ thống App-CCTV-AI.**
+**Tài liệu này được tạo để giúp các nhà phát triển và người dùng hiểu rõ cấu trúc, chức năng và hoạt động của hệ thống Workplace-Safety-CCTV-AI.**

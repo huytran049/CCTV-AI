@@ -1,0 +1,89 @@
+general:
+  source: ''
+  autoRestart: True
+  autoRestartAPI: true
+  ThreadCap: False
+  output: "output/result"
+  device: 0
+  save: False
+  show: True
+  MaxRetry: 10
+  MaxRetryAPI: 10
+  max_retries: 5
+  retry_delay: 5
+
+model_All:
+  weights: ''
+  imgsz: 640
+  conf: 0.5
+  iou: 0.5
+  colors:
+    NG: (0, 0, 255)
+    OK: (0, 255, 0)
+    OBJECT: (255, 0, 0)
+    PANEL: (0, 255, 0)
+    FLOOR: (42, 42, 128)
+    GLOVECHECK: (0, 255, 255)
+    SCISSORCHECK: (255, 0, 255)
+    LIGHTRED: (0, 0, 255)
+    LIGHTYELLOW: (0, 255, 255)
+    LIGHTGREEN: (0, 255, 0)
+    LIGHTALL: (255, 255, 255)
+
+lightBox:
+  thresh : 30
+  RectRed: (1891,260,1901,274)
+  RectYellow: (1850,278,1865,293)
+  RectGreen: (1800,300,1820,316)
+  RectAll: (1708,209,1913,359)
+  # RectRed: (1875,251,1913,304)
+  # RectYellow: (1830,272,1868,323)
+  # RectGreen: (1780,288,1830,340)
+  # RectAll: (1708,209,1913,359)
+  # RectRed2: (1889,233,1919,271)
+  # RectYellow2: (1850,248,1880,286)
+  # RectGreen2: (1811,263,1841,301)
+  # RectAll2: (1716,171,1899,288)
+
+glovedBox:
+  Count: 8
+  point1: (1,549)
+  point2: (190,106)
+  point3: (1212,433)
+  point4: (1203,839)
+  point5: (966,831)
+  point6: (944,1075)
+  point7: (631,1076)
+  point8: (1,907)
+
+scissorBox:
+  Count: 8
+  point1: (1,549)
+  point2: (190,106)
+  point3: (1212,433)
+  point4: (1203,839)
+  point5: (966,831)
+  point6: (944,1075)
+  point7: (631,1076)
+  point8: (1,907)
+
+accept_panel:
+  Count: 4
+  point1: (1547, 335)
+  point2: (1614, 421)
+  point3: (1498, 467)
+  point4: (1414, 383)
+ 
+accept_roll:
+  Count: 5
+  point1: (0, 0)
+  point2: (0, 0)
+  point3: (0, 0)
+  point4: (0, 0)  
+  point5: (0, 0)
+api:
+  API: ''
+  CAMERA_SETTING: GetCamSetting?
+  ABNORMAL: SaveAbnormalLog
+  MEDIA: SaveImage
+  POST: True
